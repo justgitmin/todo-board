@@ -57,6 +57,20 @@ export async function initDb() {
     )
   `)
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS playlist (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER NOT NULL,
+      videoId TEXT NOT NULL,
+      title TEXT NOT NULL,
+      channel TEXT DEFAULT '',
+      thumbnail TEXT DEFAULT '',
+      addedAt TEXT DEFAULT (datetime('now')),
+      UNIQUE(userId, videoId),
+      FOREIGN KEY (userId) REFERENCES users(id)
+    )
+  `)
+
   saveDb()
   return db
 }

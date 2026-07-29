@@ -1,13 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { api } from '../api'
 
 function MusicPlayer() {
   const [open, setOpen] = useState(false)
   const [minimized, setMinimized] = useState(false)
+  const [tab, setTab] = useState('search') // 'search' | 'playlist'
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
+  const [playlist, setPlaylist] = useState([])
   const [currentVideo, setCurrentVideo] = useState(null)
   const [searching, setSearching] = useState(false)
+
+  // 재생목록 불러오기
+  useEffect(() => {
+    if (open) {
+      api.getPlaylist().then((data) => setPlaylist(data.songs || [])).catch(() => {})
+    }
+  }, [open])
 
   const handleSearch = async () => {
     if (!query.trim()) return
@@ -31,6 +40,30 @@ function MusicPlayer() {
     setMinimized(false)
   }
 
+  const addToPlaylist = async (song) => {
+    try {
+      const data = await api.addToPlaylist(song)
+      setPlaylist(data.songs)
+    } catch (err) {
+      if (err.message.includes('이미')) {
+        // 이미 있으면 무시
+      } else {
+        alert(err.message)
+      }
+    }
+  }
+
+  const removeFromPlaylist = async (videoId) => {
+    try {
+      await api.removeFromPlaylist(videoId)
+      setPlaylist(playlist.filter((s) => s.videoId !== videoId))
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const isInPlaylist = (videoId) => playlist.some((s) => s.videoId === videoId)
+
   const handleClose = () => {
     setOpen(false)
     setCurrentVideo(null)
@@ -41,7 +74,7 @@ function MusicPlayer() {
     setMinimized(true)
   }
 
-  // 플레이어 닫힌 상태: 플로팅 버튼
+  // 플레이어 닫힌 상태
   if (!open) {
     return (
       <button className="music-fab" onClick={() => setOpen(true)} title="음악 플레이어">
@@ -50,7 +83,7 @@ function MusicPlayer() {
     )
   }
 
-  // 최소화 상태: 영상만 작게 표시
+  // 최소화 상태
   if (minimized) {
     return (
       <div className="music-mini">
@@ -107,36 +140,89 @@ function MusicPlayer() {
         </div>
       )}
 
-      {/* Search */}
-      <div className="music-search">
-        <input
-          type="text"
-          placeholder="노래 검색..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        <button onClick={handleSearch} disabled={searching}>
-          {searching ? '...' : '🔍'}
+      {/* Tabs */}
+      <div className="music-tabs">
+        <button
+          className={`music-tab ${tab === 'search' ? 'active' : ''}`}
+          onClick={() => setTab('search')}
+        >
+          🔍 검색
+        </button>
+        <button
+          className={`music-tab ${tab === 'playlist' ? 'active' : ''}`}
+          onClick={() => setTab('playlist')}
+        >
+          ❤️ 내 목록 ({playlist.length})
         </button>
       </div>
 
-      {/* Results */}
-      <div className="music-results">
-        {results.map((item) => (
-          <div
-            key={item.videoId}
-            className={`music-item ${currentVideo?.videoId === item.videoId ? 'active' : ''}`}
-            onClick={() => playVideo(item)}
-          >
-            <img src={item.thumbnail} alt="" className="music-thumb" />
-            <div className="music-info">
-              <span className="music-item-title">{item.title}</span>
-              <span className="music-item-channel">{item.channel}</span>
-            </div>
+      {/* Search Tab */}
+      {tab === 'search' && (
+        <>
+          <div className="music-search">
+            <input
+              type="text"
+              placeholder="노래 검색..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button onClick={handleSearch} disabled={searching}>
+              {searching ? '...' : '🔍'}
+            </button>
           </div>
-        ))}
-      </div>
+          <div className="music-results">
+            {results.map((item) => (
+              <div
+                key={item.videoId}
+                className={`music-item ${currentVideo?.videoId === item.videoId ? 'active' : ''}`}
+              >
+                <img src={item.thumbnail} alt="" className="music-thumb" onClick={() => playVideo(item)} />
+                <div className="music-info" onClick={() => playVideo(item)}>
+                  <span className="music-item-title">{item.title}</span>
+                  <span className="music-item-channel">{item.channel}</span>
+                </div>
+                <button
+                  className={`music-fav-btn ${isInPlaylist(item.videoId) ? 'saved' : ''}`}
+                  onClick={() => isInPlaylist(item.videoId) ? removeFromPlaylist(item.videoId) : addToPlaylist(item)}
+                  title={isInPlaylist(item.videoId) ? '목록에서 제거' : '내 목록에 추가'}
+                >
+                  {isInPlaylist(item.videoId) ? '❤️' : '🤍'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Playlist Tab */}
+      {tab === 'playlist' && (
+        <div className="music-results">
+          {playlist.length === 0 ? (
+            <p className="music-empty">검색에서 ❤️를 눌러 곡을 추가하세요</p>
+          ) : (
+            playlist.map((item) => (
+              <div
+                key={item.videoId}
+                className={`music-item ${currentVideo?.videoId === item.videoId ? 'active' : ''}`}
+              >
+                <img src={item.thumbnail} alt="" className="music-thumb" onClick={() => playVideo(item)} />
+                <div className="music-info" onClick={() => playVideo(item)}>
+                  <span className="music-item-title">{item.title}</span>
+                  <span className="music-item-channel">{item.channel}</span>
+                </div>
+                <button
+                  className="music-fav-btn saved"
+                  onClick={() => removeFromPlaylist(item.videoId)}
+                  title="목록에서 제거"
+                >
+                  ✕
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   )
 }

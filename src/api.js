@@ -57,6 +57,9 @@ export const api = {
 
   // Music
   searchMusic: (q) => request('GET', `/api/music/search?q=${encodeURIComponent(q)}`),
+  getPlaylist: () => request('GET', '/api/music/playlist'),
+  addToPlaylist: (song) => request('POST', '/api/music/playlist', song),
+  removeFromPlaylist: (videoId) => request('DELETE', `/api/music/playlist/${videoId}`),
 }
 
 export { getToken, setToken, clearToken }

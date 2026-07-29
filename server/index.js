@@ -317,6 +317,37 @@ app.get('/api/music/search', authMiddleware, async (req, res) => {
 })
 
 // ════════════════════════════════════════
+//  재생목록 API
+// ════════════════════════════════════════
+
+// 내 재생목록 조회
+app.get('/api/music/playlist', authMiddleware, (req, res) => {
+  const songs = getAll('SELECT * FROM playlist WHERE userId = ? ORDER BY addedAt DESC', [req.userId])
+  res.json({ songs })
+})
+
+// 재생목록에 추가
+app.post('/api/music/playlist', authMiddleware, (req, res) => {
+  const { videoId, title, channel, thumbnail } = req.body
+  if (!videoId || !title) return res.status(400).json({ error: '곡 정보가 필요합니다.' })
+
+  const existing = getOne('SELECT id FROM playlist WHERE userId = ? AND videoId = ?', [req.userId, videoId])
+  if (existing) return res.status(409).json({ error: '이미 재생목록에 있습니다.' })
+
+  run('INSERT INTO playlist (userId, videoId, title, channel, thumbnail) VALUES (?, ?, ?, ?, ?)',
+    [req.userId, videoId, title, channel || '', thumbnail || ''])
+
+  const songs = getAll('SELECT * FROM playlist WHERE userId = ? ORDER BY addedAt DESC', [req.userId])
+  res.json({ songs })
+})
+
+// 재생목록에서 삭제
+app.delete('/api/music/playlist/:videoId', authMiddleware, (req, res) => {
+  run('DELETE FROM playlist WHERE userId = ? AND videoId = ?', [req.userId, req.params.videoId])
+  res.json({ success: true })
+})
+
+// ════════════════════════════════════════
 //  실시간 동기화 (SSE)
 // ════════════════════════════════════════
 

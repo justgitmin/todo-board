@@ -1322,6 +1322,33 @@ body > #root {
   text-overflow: ellipsis;
 }
 
+/* Music Tabs */
+.music-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--input-border, #e0e0e0);
+}
+
+.music-tab {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  background: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-muted, #888);
+  transition: all 0.2s;
+}
+
+.music-tab.active {
+  color: #6c63ff;
+  border-bottom: 2px solid #6c63ff;
+}
+
+.music-tab:hover:not(.active) {
+  color: var(--text-primary, #333);
+}
+
 .music-search {
   display: flex;
   gap: 0.3rem;
@@ -1403,6 +1430,27 @@ body > #root {
 
 .music-item-channel {
   font-size: 0.65rem;
+  color: var(--text-muted, #999);
+}
+
+.music-fav-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.music-fav-btn:hover {
+  transform: scale(1.2);
+}
+
+.music-empty {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  font-size: 0.8rem;
   color: var(--text-muted, #999);
 }
 
