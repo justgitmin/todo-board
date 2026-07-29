@@ -39,7 +39,7 @@ function App() {
     if (user) fetchTodos()
   }, [user])
 
-  // 실시간 동기화 (SSE) + 모바일 복귀 시 갱신
+  // 실시간 동기화 (SSE) + 폴링 + 모바일 복귀 시 갱신
   useEffect(() => {
     if (!user) return
     const token = localStorage.getItem('todo_token')
@@ -56,6 +56,11 @@ function App() {
 
     connect()
 
+    // 폴링: 10초마다 데이터 갱신 (모바일 SSE 불안정 대비)
+    const pollInterval = setInterval(() => {
+      fetchTodos()
+    }, 10000)
+
     // 모바일: 화면 복귀 시 재연결 + 데이터 갱신
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
@@ -67,6 +72,7 @@ function App() {
 
     return () => {
       if (evtSource) evtSource.close()
+      clearInterval(pollInterval)
       document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [user])
