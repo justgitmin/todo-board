@@ -100,5 +100,7 @@ export function getAll(sql, params = []) {
 export function run(sql, params = []) {
   db.run(sql, params)
   saveDb()
-  return { lastId: db.exec("SELECT last_insert_rowid()")[0]?.values[0]?.[0] }
+  const result = db.exec("SELECT last_insert_rowid() as id")
+  const lastId = result.length > 0 ? result[0].values[0][0] : null
+  return { lastId }
 }
