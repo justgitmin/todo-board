@@ -4,6 +4,7 @@ import AuthForm from './components/AuthForm'
 import ShareModal from './components/ShareModal'
 import HelpGuide from './components/HelpGuide'
 import ProfileModal from './components/ProfileModal'
+import MusicPlayer from './components/MusicPlayer'
 import { api, getToken, clearToken } from './api'
 
 const COLUMNS = [
@@ -268,6 +269,8 @@ function App() {
           onUpdated={(updatedUser) => setUser(updatedUser)}
         />
       )}
+
+      <MusicPlayer />
     </>
   )
 }

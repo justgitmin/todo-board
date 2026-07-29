@@ -54,6 +54,9 @@ export const api = {
   // Profile
   updateProfile: (data) => request('PUT', '/api/auth/profile', data),
   changePassword: (data) => request('PUT', '/api/auth/password', data),
+
+  // Music
+  searchMusic: (q) => request('GET', `/api/music/search?q=${encodeURIComponent(q)}`),
 }
 
 export { getToken, setToken, clearToken }

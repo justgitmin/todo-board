@@ -275,6 +275,48 @@ app.delete('/api/todos/:id/share', authMiddleware, (req, res) => {
 })
 
 // ════════════════════════════════════════
+//  YouTube 음악 검색 API
+// ════════════════════════════════════════
+
+app.get('/api/music/search', authMiddleware, async (req, res) => {
+  const { q } = req.query
+  if (!q) return res.status(400).json({ error: '검색어를 입력하세요.' })
+
+  const apiKey = process.env.YOUTUBE_API_KEY
+  if (!apiKey) return res.status(500).json({ error: 'YouTube API 키가 설정되지 않았습니다.' })
+
+  try {
+    const params = new URLSearchParams({
+      part: 'snippet',
+      q: q + ' music',
+      type: 'video',
+      videoCategoryId: '10', // Music category
+      maxResults: '8',
+      key: apiKey,
+    })
+
+    const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`)
+    const data = await response.json()
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.error?.message || 'YouTube API 오류' })
+    }
+
+    const results = (data.items || []).map((item) => ({
+      videoId: item.id.videoId,
+      title: item.snippet.title,
+      channel: item.snippet.channelTitle,
+      thumbnail: item.snippet.thumbnails.default.url,
+    }))
+
+    res.json({ results })
+  } catch (err) {
+    console.error('YouTube search error:', err)
+    res.status(500).json({ error: '검색 실패' })
+  }
+})
+
+// ════════════════════════════════════════
 //  실시간 동기화 (SSE)
 // ════════════════════════════════════════
 
