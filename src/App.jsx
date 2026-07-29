@@ -5,6 +5,7 @@ import ShareModal from './components/ShareModal'
 import HelpGuide from './components/HelpGuide'
 import ProfileModal from './components/ProfileModal'
 import MusicPlayer from './components/MusicPlayer'
+import AdminPanel from './components/AdminPanel'
 import { api, getToken, clearToken } from './api'
 
 const COLUMNS = [
@@ -22,6 +23,7 @@ function App() {
   const [tab, setTab] = useState('mine') // 'mine' | 'shared'
   const [shareModal, setShareModal] = useState(null) // todo to share
   const [showProfile, setShowProfile] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(false)
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true')
   const dragItem = useRef(null)
 
@@ -187,6 +189,11 @@ function App() {
             {darkMode ? '☀️' : '🌙'}
           </button>
           <HelpGuide />
+          {user.isAdmin && (
+            <button className="admin-toggle-btn" onClick={() => setShowAdmin(true)} title="관리자">
+              ⚙️
+            </button>
+          )}
           <button className="profile-btn" onClick={() => setShowProfile(true)}>
             👤 {user.displayName}
           </button>
@@ -268,6 +275,10 @@ function App() {
           onClose={() => setShowProfile(false)}
           onUpdated={(updatedUser) => setUser(updatedUser)}
         />
+      )}
+
+      {showAdmin && (
+        <AdminPanel onClose={() => setShowAdmin(false)} />
       )}
 
       <MusicPlayer />

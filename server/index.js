@@ -32,6 +32,14 @@ function authMiddleware(req, res, next) {
   next()
 }
 
+function adminMiddleware(req, res, next) {
+  const user = getOne('SELECT isAdmin FROM users WHERE id = ?', [req.userId])
+  if (!user || !user.isAdmin) {
+    return res.status(403).json({ error: '관리자 권한이 필요합니다.' })
+  }
+  next()
+}
+
 // SSE: 특정 사용자에게 이벤트 전송
 function notifyUser(userId, event, data) {
   const clients = sseClients.get(userId)
@@ -71,9 +79,9 @@ app.post('/api/auth/register', (req, res) => {
   const hashed = bcrypt.hashSync(password, 10)
   const result = run('INSERT INTO users (username, password, displayName) VALUES (?, ?, ?)', [username, hashed, displayName])
 
-  const newUser = getOne('SELECT id, username, displayName FROM users WHERE username = ?', [username])
+  const newUser = getOne('SELECT id, username, displayName, isAdmin FROM users WHERE username = ?', [username])
   const token = createSession(newUser.id)
-  res.json({ token, user: { id: newUser.id, username: newUser.username, displayName: newUser.displayName } })
+  res.json({ token, user: { id: newUser.id, username: newUser.username, displayName: newUser.displayName, isAdmin: !!newUser.isAdmin } })
 })
 
 app.post('/api/auth/login', (req, res) => {
@@ -88,12 +96,12 @@ app.post('/api/auth/login', (req, res) => {
   }
 
   const token = createSession(user.id)
-  res.json({ token, user: { id: user.id, username: user.username, displayName: user.displayName } })
+  res.json({ token, user: { id: user.id, username: user.username, displayName: user.displayName, isAdmin: !!user.isAdmin } })
 })
 
 app.get('/api/auth/me', authMiddleware, (req, res) => {
-  const user = getOne('SELECT id, username, displayName FROM users WHERE id = ?', [req.userId])
-  res.json({ user })
+  const user = getOne('SELECT id, username, displayName, isAdmin FROM users WHERE id = ?', [req.userId])
+  res.json({ user: { ...user, isAdmin: !!user.isAdmin } })
 })
 
 app.post('/api/auth/logout', (req, res) => {
@@ -271,6 +279,60 @@ app.delete('/api/todos/:id/share', authMiddleware, (req, res) => {
   }
 
   run('DELETE FROM shares WHERE todoId = ?', [todo.id])
+  res.json({ success: true })
+})
+
+// ════════════════════════════════════════
+//  관리자 API
+// ════════════════════════════════════════
+
+// 전체 사용자 목록 조회
+app.get('/api/admin/users', authMiddleware, adminMiddleware, (req, res) => {
+  const users = getAll('SELECT id, username, displayName, isAdmin, createdAt FROM users ORDER BY createdAt DESC')
+  res.json({ users: users.map((u) => ({ ...u, isAdmin: !!u.isAdmin })) })
+})
+
+// 사용자 삭제
+app.delete('/api/admin/users/:id', authMiddleware, adminMiddleware, (req, res) => {
+  const userId = Number(req.params.id)
+  if (userId === req.userId) {
+    return res.status(400).json({ error: '본인 계정은 삭제할 수 없습니다.' })
+  }
+
+  const user = getOne('SELECT id FROM users WHERE id = ?', [userId])
+  if (!user) return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' })
+
+  // 관련 데이터 삭제
+  run('DELETE FROM shares WHERE sharedWithId = ?', [userId])
+  run('DELETE FROM shares WHERE todoId IN (SELECT id FROM todos WHERE ownerId = ?)', [userId])
+  run('DELETE FROM todos WHERE ownerId = ?', [userId])
+  run('DELETE FROM playlist WHERE userId = ?', [userId])
+  run('DELETE FROM users WHERE id = ?', [userId])
+
+  res.json({ success: true })
+})
+
+// 관리자 권한 부여/해제
+app.put('/api/admin/users/:id/role', authMiddleware, adminMiddleware, (req, res) => {
+  const userId = Number(req.params.id)
+  const { isAdmin } = req.body
+
+  if (userId === req.userId) {
+    return res.status(400).json({ error: '본인 권한은 변경할 수 없습니다.' })
+  }
+
+  run('UPDATE users SET isAdmin = ? WHERE id = ?', [isAdmin ? 1 : 0, userId])
+  res.json({ success: true })
+})
+
+// 사용자 비밀번호 초기화
+app.put('/api/admin/users/:id/reset-password', authMiddleware, adminMiddleware, (req, res) => {
+  const userId = Number(req.params.id)
+  const { newPassword } = req.body
+  if (!newPassword) return res.status(400).json({ error: '새 비밀번호를 입력하세요.' })
+
+  const hashed = bcrypt.hashSync(newPassword, 10)
+  run('UPDATE users SET password = ? WHERE id = ?', [hashed, userId])
   res.json({ success: true })
 })
 

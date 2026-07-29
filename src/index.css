@@ -1573,3 +1573,135 @@ body > #root {
   background: rgba(108, 99, 255, 0.1);
   color: #6c63ff;
 }
+
+
+/* ═══ Admin Panel ═══ */
+.admin-toggle-btn {
+  background: none;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-toggle-btn:hover {
+  background: rgba(108, 99, 255, 0.1);
+}
+
+.admin-modal {
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.admin-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.admin-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.admin-user-item {
+  padding: 0.8rem;
+  border: 1px solid var(--input-border, #e0e0e0);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-user-info {
+  flex: 1;
+  min-width: 150px;
+}
+
+.admin-user-name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.admin-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.65rem;
+  background: #6c63ff;
+  color: white;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.admin-user-meta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.admin-user-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.admin-action-btn {
+  background: none;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-action-btn:hover {
+  background: rgba(108, 99, 255, 0.1);
+}
+
+.admin-action-btn.delete:hover {
+  background: #ffebee;
+}
+
+.admin-reset-pw {
+  display: flex;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.admin-reset-pw input {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  outline: none;
+  background: var(--input-bg, white);
+  color: var(--text-primary);
+}
+
+.admin-reset-pw input:focus {
+  border-color: #6c63ff;
+}
+
+.admin-reset-pw button {
+  padding: 0.3rem 0.6rem;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-reset-pw button:hover {
+  background: #f57c00;
+}

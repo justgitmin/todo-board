@@ -60,6 +60,12 @@ export const api = {
   getPlaylist: () => request('GET', '/api/music/playlist'),
   addToPlaylist: (song) => request('POST', '/api/music/playlist', song),
   removeFromPlaylist: (videoId) => request('DELETE', `/api/music/playlist/${videoId}`),
+
+  // Admin
+  getAdminUsers: () => request('GET', '/api/admin/users'),
+  deleteUser: (id) => request('DELETE', `/api/admin/users/${id}`),
+  setUserRole: (id, isAdmin) => request('PUT', `/api/admin/users/${id}/role`, { isAdmin }),
+  resetUserPassword: (id, newPassword) => request('PUT', `/api/admin/users/${id}/reset-password`, { newPassword }),
 }
 
 export { getToken, setToken, clearToken }

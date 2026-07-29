@@ -26,6 +26,7 @@ export async function initDb() {
       username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       displayName TEXT NOT NULL,
+      isAdmin INTEGER DEFAULT 0,
       createdAt TEXT DEFAULT (datetime('now'))
     )
   `)
