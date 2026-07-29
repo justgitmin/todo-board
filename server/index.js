@@ -47,8 +47,9 @@ app.post('/api/auth/register', (req, res) => {
   const hashed = bcrypt.hashSync(password, 10)
   const result = run('INSERT INTO users (username, password, displayName) VALUES (?, ?, ?)', [username, hashed, displayName])
 
-  const token = createSession(result.lastId)
-  res.json({ token, user: { id: result.lastId, username, displayName } })
+  const newUser = getOne('SELECT id, username, displayName FROM users WHERE username = ?', [username])
+  const token = createSession(newUser.id)
+  res.json({ token, user: { id: newUser.id, username: newUser.username, displayName: newUser.displayName } })
 })
 
 app.post('/api/auth/login', (req, res) => {
@@ -127,6 +128,11 @@ app.post('/api/todos', authMiddleware, (req, res) => {
   )
 
   const todo = getOne('SELECT * FROM todos WHERE id = ?', [result.lastId])
+  if (!todo) {
+    // fallback: 가장 최근 추가된 것 가져오기
+    const fallback = getOne('SELECT * FROM todos WHERE ownerId = ? ORDER BY id DESC LIMIT 1', [req.userId])
+    return res.json({ todo: { ...fallback, checklist: JSON.parse(fallback.checklist), shares: [] } })
+  }
   res.json({ todo: { ...todo, checklist: JSON.parse(todo.checklist), shares: [] } })
 })
 

@@ -100,7 +100,10 @@ export function getAll(sql, params = []) {
 export function run(sql, params = []) {
   db.run(sql, params)
   saveDb()
-  const result = db.exec("SELECT last_insert_rowid() as id")
-  const lastId = result.length > 0 ? result[0].values[0][0] : null
+  // sql.js에서 last_insert_rowid 가져오기
+  const stmt = db.prepare("SELECT last_insert_rowid() as id")
+  stmt.step()
+  const lastId = stmt.getAsObject().id
+  stmt.free()
   return { lastId }
 }
