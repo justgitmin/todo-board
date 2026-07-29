@@ -1,0 +1,477 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  color: #1a1a2e;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* NAVER WORKS Sync Bar */
+.nw-sync-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  padding: 0.7rem 1.2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  flex-wrap: wrap;
+}
+
+.nw-status {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.nw-status.connected {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.nw-btn {
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.nw-btn.login {
+  background: #03c75a;
+  color: white;
+}
+
+.nw-btn.login:hover {
+  background: #02b351;
+}
+
+.nw-btn.sync {
+  background: #6c63ff;
+  color: white;
+}
+
+.nw-btn.sync:hover {
+  background: #5a52d5;
+}
+
+.nw-btn.sync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nw-btn.logout {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.nw-btn.logout:hover {
+  background: #e0e0e0;
+}
+
+/* Add Todo Form */
+.add-todo-form {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.add-todo-form input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.add-todo-form input:focus {
+  border-color: #6c63ff;
+}
+
+.add-todo-form button {
+  padding: 0.75rem 1.5rem;
+  background: #6c63ff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-todo-form button:hover {
+  background: #5a52d5;
+}
+
+/* Kanban Board */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Column */
+.board-column {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  padding: 1rem;
+  min-height: 300px;
+  transition: background 0.2s;
+}
+
+.board-column:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.column-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #444;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.column-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* Sticky Note Card */
+.todo-card {
+  background: #fffde7;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s, transform 0.2s, opacity 0.2s;
+  cursor: grab;
+  border-left: 5px solid #fdd835;
+  position: relative;
+}
+
+.todo-card:active {
+  cursor: grabbing;
+  opacity: 0.8;
+}
+
+.todo-card:nth-child(4n+1) {
+  background: #fffde7;
+  border-left-color: #fdd835;
+}
+
+.todo-card:nth-child(4n+2) {
+  background: #e8f5e9;
+  border-left-color: #66bb6a;
+}
+
+.todo-card:nth-child(4n+3) {
+  background: #e3f2fd;
+  border-left-color: #42a5f5;
+}
+
+.todo-card:nth-child(4n) {
+  background: #fce4ec;
+  border-left-color: #ef5350;
+}
+
+.todo-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.todo-card.expanded {
+  transform: none;
+  cursor: default;
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  cursor: pointer;
+}
+
+.card-title.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Title edit input */
+.title-edit-input {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  border: 1px solid #6c63ff;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  outline: none;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.expand-icon {
+  font-size: 1rem;
+  color: #888;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.expand-icon.open {
+  transform: rotate(180deg);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.delete-btn:hover {
+  color: #e53935;
+  background: rgba(229, 57, 53, 0.1);
+}
+
+/* Summary badges */
+.card-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.badge.dday {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.badge.dday.overdue {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.badge.nw-badge {
+  background: #03c75a;
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #6c63ff;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #666;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Expanded Content */
+.card-body {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+/* Deadline & Comment */
+.meta-row {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.meta-row label {
+  font-size: 0.75rem;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-row input,
+.meta-row textarea {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.meta-row input:focus,
+.meta-row textarea:focus {
+  border-color: #6c63ff;
+}
+
+.meta-row textarea {
+  resize: vertical;
+  min-height: 40px;
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Checklist */
+.checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #6c63ff;
+  cursor: pointer;
+}
+
+.checklist-item span {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.checklist-item span.done {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.checklist-item .remove-check-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 0.3rem;
+}
+
+.checklist-item .remove-check-btn:hover {
+  color: #e53935;
+}
+
+/* Add checklist item */
+.add-checklist {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.add-checklist input {
+  flex: 1;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.add-checklist input:focus {
+  border-color: #6c63ff;
+}
+
+.add-checklist button {
+  padding: 0.35rem 0.7rem;
+  background: #6c63ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.add-checklist button:hover {
+  background: #5a52d5;
+}
+
+/* Deadline warning */
+.deadline-warning {
+  color: #e53935;
+  font-weight: 600;
+}
+
+/* Drag feedback */
+.board-column.drag-over {
+  background: rgba(108, 99, 255, 0.05);
+  outline: 2px dashed #6c63ff;
+  outline-offset: -4px;
+}
