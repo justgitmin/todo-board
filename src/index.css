@@ -1313,6 +1313,34 @@ body > #root {
   display: block;
 }
 
+/* iframe 항상 렌더링 — 위치만 전환 */
+.music-iframe-container {
+  position: fixed;
+  z-index: 901;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.music-iframe-container.full-pos {
+  bottom: calc(1.5rem + 38px);
+  right: 1.5rem;
+  width: 320px;
+  height: 160px;
+}
+
+.music-iframe-container.mini-pos {
+  bottom: calc(1.5rem + 30px);
+  right: 1.5rem;
+  width: 200px;
+  height: 113px;
+}
+
+.music-now-playing-slot {
+  height: 160px;
+  border-bottom: 1px solid var(--input-border, #e0e0e0);
+}
+
 .music-current-title {
   padding: 0.4rem 0.8rem;
   font-size: 0.75rem;
@@ -1466,6 +1494,18 @@ body > #root {
   .music-mini {
     right: 1rem;
     bottom: 1rem;
+  }
+
+  .music-iframe-container.full-pos {
+    right: 1rem;
+    width: calc(100% - 2rem);
+    height: 140px;
+    bottom: calc(1rem + 38px);
+  }
+
+  .music-iframe-container.mini-pos {
+    right: 1rem;
+    bottom: calc(1rem + 30px);
   }
 }
 
