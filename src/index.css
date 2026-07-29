@@ -557,6 +557,30 @@ body {
   font-weight: 600;
 }
 
+/* Delete area inside expanded card */
+.card-delete-area {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+  text-align: right;
+}
+
+.delete-btn-full {
+  padding: 0.4rem 1rem;
+  background: #fff5f5;
+  color: #e53935;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-btn-full:hover {
+  background: #ffebee;
+}
+
 /* ═══ Share Modal ═══ */
 .modal-backdrop {
   position: fixed;

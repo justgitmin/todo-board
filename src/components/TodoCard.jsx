@@ -144,9 +144,13 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
             className="delete-btn"
             onClick={(e) => {
               e.stopPropagation()
-              onDelete()
+              if (window.confirm(`"${todo.title}" 을(를) 삭제하시겠습니까?`)) {
+                onDelete()
+              }
             }}
             aria-label="삭제"
+            title="삭제"
+            style={{ display: expanded ? 'none' : 'inline-block' }}
           >
             ✕
           </button>
@@ -249,6 +253,22 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
             />
             <button onClick={addCheckItem}>+</button>
           </div>
+
+          {/* Delete button inside expanded */}
+          {isOwner && (
+            <div className="card-delete-area">
+              <button
+                className="delete-btn-full"
+                onClick={() => {
+                  if (window.confirm(`"${todo.title}" 을(를) 삭제하시겠습니까?`)) {
+                    onDelete()
+                  }
+                }}
+              >
+                🗑️ 삭제
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
