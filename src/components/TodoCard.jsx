@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 
-function TodoCard({ todo, onUpdate, onDelete, onDragStart, onDragEnd }) {
+function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, isOwner }) {
   const [expanded, setExpanded] = useState(false)
   const [newCheckItem, setNewCheckItem] = useState('')
   const [editingTitle, setEditingTitle] = useState(false)
@@ -48,7 +48,7 @@ function TodoCard({ todo, onUpdate, onDelete, onDragStart, onDragEnd }) {
 
   const commitTitle = () => {
     const trimmed = titleDraft.trim()
-    if (trimmed) {
+    if (trimmed && trimmed !== todo.title) {
       onUpdate({ title: trimmed })
     } else {
       setTitleDraft(todo.title)
@@ -84,6 +84,7 @@ function TodoCard({ todo, onUpdate, onDelete, onDragStart, onDragEnd }) {
 
   const dday = getDday()
   const progress = getProgress()
+  const hasShares = todo.shares && todo.shares.length > 0
 
   return (
     <div
@@ -138,23 +139,28 @@ function TodoCard({ todo, onUpdate, onDelete, onDragStart, onDragEnd }) {
         >
           ▼
         </span>
-        <button
-          className="delete-btn"
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete()
-          }}
-          aria-label="삭제"
-        >
-          ✕
-        </button>
+        {isOwner && (
+          <button
+            className="delete-btn"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete()
+            }}
+            aria-label="삭제"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
-      {/* Summary badges: D-day & Progress */}
-      {(dday !== null || progress !== null || todo.source === 'naverworks') && (
+      {/* Summary badges */}
+      {(dday !== null || progress !== null || hasShares || todo.isShared) && (
         <div className="card-summary">
-          {todo.source === 'naverworks' && (
-            <span className="badge nw-badge">N</span>
+          {todo.isShared && (
+            <span className="badge shared-badge">📨 {todo.ownerName}</span>
+          )}
+          {hasShares && (
+            <span className="badge shared-badge">👥 {todo.shares.length}명 공유</span>
           )}
           {dday && (
             <span className={`badge dday ${isOverdue() ? 'overdue' : ''}`}>
@@ -177,6 +183,16 @@ function TodoCard({ todo, onUpdate, onDelete, onDragStart, onDragEnd }) {
 
       {expanded && (
         <div className="card-body" onClick={(e) => e.stopPropagation()}>
+          {/* Share button */}
+          {isOwner && (
+            <button
+              className="share-btn"
+              onClick={() => onShare()}
+            >
+              👥 공유 설정
+            </button>
+          )}
+
           {/* Deadline & Comment */}
           <div className="meta-row">
             <label>
@@ -209,7 +225,6 @@ function TodoCard({ todo, onUpdate, onDelete, onDragStart, onDragEnd }) {
                   type="checkbox"
                   checked={item.done}
                   onChange={() => toggleChecklist(item.id)}
-                  id={`check-${todo.id}-${item.id}`}
                 />
                 <span className={item.done ? 'done' : ''}>{item.text}</span>
                 <button

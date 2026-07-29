@@ -11,82 +11,159 @@ body {
   padding: 2rem;
 }
 
-h1 {
+/* Loading */
+.loading {
   text-align: center;
-  color: #1a1a2e;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
-  font-weight: 700;
+  padding: 4rem;
+  color: #888;
+  font-size: 1.1rem;
 }
 
-/* NAVER WORKS Sync Bar */
-.nw-sync-bar {
+/* ═══ Auth Form ═══ */
+.auth-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
-  max-width: 600px;
-  margin: 0 auto 1.5rem;
-  padding: 0.7rem 1.2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  flex-wrap: wrap;
+  min-height: 80vh;
 }
 
-.nw-status {
+.auth-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 360px;
+}
+
+.auth-card h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.auth-card input {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.auth-card input:focus {
+  border-color: #6c63ff;
+}
+
+.auth-card button {
+  padding: 0.8rem;
+  background: #6c63ff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.auth-card button:hover {
+  background: #5a52d5;
+}
+
+.auth-error {
+  color: #e53935;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1rem;
   font-size: 0.85rem;
   color: #888;
 }
 
-.nw-status.connected {
-  color: #2e7d32;
-  font-weight: 600;
-}
-
-.nw-btn {
-  padding: 0.4rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
+.auth-switch span {
+  color: #6c63ff;
   cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+  font-weight: 600;
 }
 
-.nw-btn.login {
-  background: #03c75a;
-  color: white;
+/* ═══ App Header ═══ */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto 1rem;
 }
 
-.nw-btn.login:hover {
-  background: #02b351;
+.app-header h1 {
+  margin-bottom: 0;
+  font-size: 1.6rem;
 }
 
-.nw-btn.sync {
-  background: #6c63ff;
-  color: white;
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.9rem;
+  color: #555;
 }
 
-.nw-btn.sync:hover {
-  background: #5a52d5;
-}
-
-.nw-btn.sync:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.nw-btn.logout {
+.logout-btn {
+  padding: 0.4rem 0.8rem;
   background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
   color: #666;
 }
 
-.nw-btn.logout:hover {
+.logout-btn:hover {
   background: #e0e0e0;
 }
 
-/* Add Todo Form */
+/* ═══ Tab Bar ═══ */
+.tab-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  padding: 0.5rem 1.2rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: #6c63ff;
+  border-color: #6c63ff;
+  color: white;
+}
+
+.tab-btn:hover:not(.active) {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+/* ═══ Add Todo Form ═══ */
 .add-todo-form {
   display: flex;
   gap: 0.5rem;
@@ -124,7 +201,7 @@ h1 {
   background: #5a52d5;
 }
 
-/* Kanban Board */
+/* ═══ Kanban Board ═══ */
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -139,7 +216,6 @@ h1 {
   }
 }
 
-/* Column */
 .board-column {
   background: rgba(255, 255, 255, 0.5);
   border-radius: 16px;
@@ -167,7 +243,7 @@ h1 {
   gap: 0.8rem;
 }
 
-/* Sticky Note Card */
+/* ═══ Todo Card ═══ */
 .todo-card {
   background: #fffde7;
   border-radius: 12px;
@@ -234,7 +310,6 @@ h1 {
   opacity: 0.6;
 }
 
-/* Title edit input */
 .title-edit-input {
   flex: 1;
   font-size: 1rem;
@@ -278,12 +353,13 @@ h1 {
 .card-summary {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   margin-top: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .badge {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
@@ -300,12 +376,9 @@ h1 {
   color: #c62828;
 }
 
-.badge.nw-badge {
-  background: #03c75a;
-  color: white;
-  font-size: 0.65rem;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
+.badge.shared-badge {
+  background: #ede7f6;
+  color: #5e35b1;
 }
 
 .progress-wrap {
@@ -338,6 +411,25 @@ h1 {
   text-align: right;
 }
 
+/* Share button */
+.share-btn {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: #ede7f6;
+  color: #5e35b1;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.8rem;
+  transition: background 0.2s;
+}
+
+.share-btn:hover {
+  background: #d1c4e9;
+}
+
 /* Expanded Content */
 .card-body {
   margin-top: 0.8rem;
@@ -345,7 +437,6 @@ h1 {
   border-top: 1px dashed rgba(0, 0, 0, 0.1);
 }
 
-/* Deadline & Comment */
 .meta-row {
   display: flex;
   gap: 0.8rem;
@@ -384,7 +475,6 @@ h1 {
   min-width: 150px;
 }
 
-/* Checklist */
 .checklist {
   list-style: none;
   display: flex;
@@ -429,7 +519,6 @@ h1 {
   color: #e53935;
 }
 
-/* Add checklist item */
 .add-checklist {
   display: flex;
   gap: 0.4rem;
@@ -463,15 +552,113 @@ h1 {
   background: #5a52d5;
 }
 
-/* Deadline warning */
 .deadline-warning {
   color: #e53935;
   font-weight: 600;
 }
 
-/* Drag feedback */
-.board-column.drag-over {
-  background: rgba(108, 99, 255, 0.05);
-  outline: 2px dashed #6c63ff;
-  outline-offset: -4px;
+/* ═══ Share Modal ═══ */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 0.3rem;
+  color: #333;
+}
+
+.modal-subtitle {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 1.2rem;
+}
+
+.modal-empty {
+  color: #888;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.share-user-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.share-user-item label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.share-user-item label:hover {
+  background: #f5f5f5;
+}
+
+.share-user-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #6c63ff;
+}
+
+.share-username {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-left: auto;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-btn.cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.modal-btn.save {
+  background: #6c63ff;
+  color: white;
+}
+
+.modal-btn.save:hover {
+  background: #5a52d5;
 }
