@@ -38,6 +38,25 @@ function App() {
     if (user) fetchTodos()
   }, [user])
 
+  // 실시간 동기화 (SSE)
+  useEffect(() => {
+    if (!user) return
+    const token = localStorage.getItem('todo_token')
+    if (!token) return
+
+    const evtSource = new EventSource(`/api/events?token=${token}`)
+
+    evtSource.addEventListener('refresh', () => {
+      fetchTodos()
+    })
+
+    evtSource.onerror = () => {
+      // 연결 끊기면 자동 재연결 (브라우저 기본 동작)
+    }
+
+    return () => evtSource.close()
+  }, [user])
+
   const fetchTodos = async () => {
     try {
       const data = await api.getTodos()

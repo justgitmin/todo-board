@@ -14,6 +14,9 @@ app.use(express.json())
 // ─── 세션 저장소 (메모리) ───
 const sessions = {}
 
+// ─── SSE 클라이언트 저장소 ───
+const sseClients = new Map() // userId -> Set of response objects
+
 function createSession(userId) {
   const token = crypto.randomBytes(32).toString('hex')
   sessions[token] = { userId, createdAt: Date.now() }
@@ -27,6 +30,27 @@ function authMiddleware(req, res, next) {
   }
   req.userId = sessions[token].userId
   next()
+}
+
+// SSE: 특정 사용자에게 이벤트 전송
+function notifyUser(userId, event, data) {
+  const clients = sseClients.get(userId)
+  if (clients) {
+    const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
+    clients.forEach((res) => res.write(msg))
+  }
+}
+
+// SSE: 할일 관련 사용자들에게 알림 (소유자 + 공유 대상)
+function notifyTodoUpdate(todoId, excludeUserId) {
+  const todo = getOne('SELECT * FROM todos WHERE id = ?', [todoId])
+  if (!todo) return
+
+  const shares = getAll('SELECT sharedWithId FROM shares WHERE todoId = ?', [todoId])
+  const userIds = [todo.ownerId, ...shares.map((s) => s.sharedWithId)]
+    .filter((id) => id !== excludeUserId)
+
+  userIds.forEach((uid) => notifyUser(uid, 'refresh', { todoId }))
 }
 
 // ════════════════════════════════════════
@@ -129,7 +153,6 @@ app.post('/api/todos', authMiddleware, (req, res) => {
 
   const todo = getOne('SELECT * FROM todos WHERE id = ?', [result.lastId])
   if (!todo) {
-    // fallback: 가장 최근 추가된 것 가져오기
     const fallback = getOne('SELECT * FROM todos WHERE ownerId = ? ORDER BY id DESC LIMIT 1', [req.userId])
     return res.json({ todo: { ...fallback, checklist: JSON.parse(fallback.checklist), shares: [] } })
   }
@@ -157,6 +180,7 @@ app.put('/api/todos/:id', authMiddleware, (req, res) => {
     [newTitle, newStatus, newDeadline, newComment, newChecklist, todo.id])
 
   const updated = getOne('SELECT * FROM todos WHERE id = ?', [todo.id])
+  notifyTodoUpdate(todo.id, req.userId)
   res.json({ todo: { ...updated, checklist: JSON.parse(updated.checklist) } })
 })
 
@@ -169,6 +193,7 @@ app.delete('/api/todos/:id', authMiddleware, (req, res) => {
 
   run('DELETE FROM shares WHERE todoId = ?', [todo.id])
   run('DELETE FROM todos WHERE id = ?', [todo.id])
+  notifyTodoUpdate(todo.id, req.userId)
   res.json({ success: true })
 })
 
@@ -202,6 +227,11 @@ app.post('/api/todos/:id/share', authMiddleware, (req, res) => {
     WHERE s.todoId = ?
   `, [todo.id])
 
+  // 공유 대상에게 알림
+  for (const uid of userIds) {
+    if (uid !== req.userId) notifyUser(uid, 'refresh', { todoId: todo.id })
+  }
+
   res.json({ shares })
 })
 
@@ -214,6 +244,41 @@ app.delete('/api/todos/:id/share', authMiddleware, (req, res) => {
 
   run('DELETE FROM shares WHERE todoId = ?', [todo.id])
   res.json({ success: true })
+})
+
+// ════════════════════════════════════════
+//  실시간 동기화 (SSE)
+// ════════════════════════════════════════
+
+app.get('/api/events', (req, res) => {
+  const token = req.query.token
+  if (!token || !sessions[token]) {
+    return res.status(401).end()
+  }
+
+  const userId = sessions[token].userId
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  })
+
+  res.write(`event: connected\ndata: {}\n\n`)
+
+  if (!sseClients.has(userId)) {
+    sseClients.set(userId, new Set())
+  }
+  sseClients.get(userId).add(res)
+
+  req.on('close', () => {
+    const clients = sseClients.get(userId)
+    if (clients) {
+      clients.delete(res)
+      if (clients.size === 0) sseClients.delete(userId)
+    }
+  })
 })
 
 // ════════════════════════════════════════

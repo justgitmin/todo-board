@@ -32,7 +32,10 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
   }
 
   const removeCheckItem = (checkId) => {
-    onUpdate({ checklist: todo.checklist.filter((item) => item.id !== checkId) })
+    const item = todo.checklist.find((i) => i.id === checkId)
+    if (window.confirm(`"${item?.text}" 항목을 삭제하시겠습니까?`)) {
+      onUpdate({ checklist: todo.checklist.filter((i) => i.id !== checkId) })
+    }
   }
 
   const handleCheckKeyDown = (e) => {
