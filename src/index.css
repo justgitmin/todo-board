@@ -475,6 +475,42 @@ body {
   text-align: right;
 }
 
+/* Status move buttons */
+.status-move {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.status-btn {
+  flex: 1;
+  padding: 0.4rem 0.3rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.status-btn:hover:not(:disabled) {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+.status-btn.current {
+  background: #6c63ff;
+  border-color: #6c63ff;
+  color: white;
+  cursor: default;
+}
+
+.status-btn:disabled {
+  opacity: 0.7;
+}
+
 /* Share button */
 .share-btn {
   display: inline-block;

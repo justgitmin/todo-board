@@ -190,6 +190,22 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
 
       {expanded && (
         <div className="card-body" onClick={(e) => e.stopPropagation()}>
+          {/* Status move buttons (mobile-friendly) */}
+          <div className="status-move">
+            {['todo', 'inProgress', 'done'].map((s) => (
+              <button
+                key={s}
+                className={`status-btn ${todo.status === s ? 'current' : ''}`}
+                onClick={() => {
+                  if (todo.status !== s) onUpdate({ status: s })
+                }}
+                disabled={todo.status === s}
+              >
+                {s === 'todo' ? '📝 할일' : s === 'inProgress' ? '🚀 진행' : '✅ 완료'}
+              </button>
+            ))}
+          </div>
+
           {/* Share button */}
           {isOwner && (
             <button

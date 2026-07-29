@@ -39,23 +39,36 @@ function App() {
     if (user) fetchTodos()
   }, [user])
 
-  // 실시간 동기화 (SSE)
+  // 실시간 동기화 (SSE) + 모바일 복귀 시 갱신
   useEffect(() => {
     if (!user) return
     const token = localStorage.getItem('todo_token')
     if (!token) return
 
-    const evtSource = new EventSource(`/api/events?token=${token}`)
+    let evtSource = null
 
-    evtSource.addEventListener('refresh', () => {
-      fetchTodos()
-    })
-
-    evtSource.onerror = () => {
-      // 연결 끊기면 자동 재연결 (브라우저 기본 동작)
+    const connect = () => {
+      if (evtSource) evtSource.close()
+      evtSource = new EventSource(`/api/events?token=${token}`)
+      evtSource.addEventListener('refresh', () => fetchTodos())
+      evtSource.onerror = () => {}
     }
 
-    return () => evtSource.close()
+    connect()
+
+    // 모바일: 화면 복귀 시 재연결 + 데이터 갱신
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        connect()
+        fetchTodos()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      if (evtSource) evtSource.close()
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [user])
 
   const fetchTodos = async () => {
