@@ -132,6 +132,70 @@ body {
   background: #e0e0e0;
 }
 
+/* ═══ Help Guide ═══ */
+.help-guide {
+  position: relative;
+}
+
+.help-toggle {
+  padding: 0.4rem 0.8rem;
+  background: #fff3e0;
+  border: 1px solid #ffcc02;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #e65100;
+  transition: background 0.2s;
+}
+
+.help-toggle:hover {
+  background: #ffe0b2;
+}
+
+.help-content {
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  width: 360px;
+  z-index: 500;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.help-content h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+.help-content ol {
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.help-content li {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.help-content li strong {
+  color: #333;
+}
+
+.help-content li em {
+  color: #6c63ff;
+  font-style: normal;
+  font-weight: 600;
+}
+
 /* ═══ Tab Bar ═══ */
 .tab-bar {
   display: flex;

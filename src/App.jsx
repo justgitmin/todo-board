@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import TodoCard from './components/TodoCard'
 import AuthForm from './components/AuthForm'
 import ShareModal from './components/ShareModal'
+import HelpGuide from './components/HelpGuide'
 import { api, getToken, clearToken } from './api'
 
 const COLUMNS = [
@@ -149,6 +150,7 @@ function App() {
       <header className="app-header">
         <h1>📋 Todo Board</h1>
         <div className="user-info">
+          <HelpGuide />
           <span>👤 {user.displayName}</span>
           <button onClick={handleLogout} className="logout-btn">로그아웃</button>
         </div>
