@@ -102,6 +102,34 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ success: true })
 })
 
+// 프로필 이름 변경
+app.put('/api/auth/profile', authMiddleware, (req, res) => {
+  const { displayName } = req.body
+  if (!displayName || !displayName.trim()) {
+    return res.status(400).json({ error: '이름을 입력하세요.' })
+  }
+  run('UPDATE users SET displayName = ? WHERE id = ?', [displayName.trim(), req.userId])
+  const user = getOne('SELECT id, username, displayName FROM users WHERE id = ?', [req.userId])
+  res.json({ user })
+})
+
+// 비밀번호 변경
+app.put('/api/auth/password', authMiddleware, (req, res) => {
+  const { currentPassword, newPassword } = req.body
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: '모든 필드를 입력하세요.' })
+  }
+
+  const user = getOne('SELECT * FROM users WHERE id = ?', [req.userId])
+  if (!bcrypt.compareSync(currentPassword, user.password)) {
+    return res.status(401).json({ error: '현재 비밀번호가 틀립니다.' })
+  }
+
+  const hashed = bcrypt.hashSync(newPassword, 10)
+  run('UPDATE users SET password = ? WHERE id = ?', [hashed, req.userId])
+  res.json({ success: true })
+})
+
 // ════════════════════════════════════════
 //  팀원 목록 API
 // ════════════════════════════════════════

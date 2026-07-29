@@ -3,6 +3,7 @@ import TodoCard from './components/TodoCard'
 import AuthForm from './components/AuthForm'
 import ShareModal from './components/ShareModal'
 import HelpGuide from './components/HelpGuide'
+import ProfileModal from './components/ProfileModal'
 import { api, getToken, clearToken } from './api'
 
 const COLUMNS = [
@@ -19,7 +20,15 @@ function App() {
   const [newTitle, setNewTitle] = useState('')
   const [tab, setTab] = useState('mine') // 'mine' | 'shared'
   const [shareModal, setShareModal] = useState(null) // todo to share
+  const [showProfile, setShowProfile] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true')
   const dragItem = useRef(null)
+
+  // 다크모드 적용
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
+    localStorage.setItem('darkMode', darkMode)
+  }, [darkMode])
 
   // 자동 로그인 체크
   useEffect(() => {
@@ -169,8 +178,17 @@ function App() {
       <header className="app-header">
         <h1>📋 Todo Board</h1>
         <div className="user-info">
+          <button
+            className="theme-toggle"
+            onClick={() => setDarkMode(!darkMode)}
+            title={darkMode ? '라이트 모드' : '다크 모드'}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
           <HelpGuide />
-          <span>👤 {user.displayName}</span>
+          <button className="profile-btn" onClick={() => setShowProfile(true)}>
+            👤 {user.displayName}
+          </button>
           <button onClick={handleLogout} className="logout-btn">로그아웃</button>
         </div>
       </header>
@@ -240,6 +258,14 @@ function App() {
             handleShared(shareModal.id, shares)
             setShareModal(null)
           }}
+        />
+      )}
+
+      {showProfile && (
+        <ProfileModal
+          user={user}
+          onClose={() => setShowProfile(false)}
+          onUpdated={(updatedUser) => setUser(updatedUser)}
         />
       )}
     </>

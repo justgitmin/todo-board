@@ -50,6 +50,10 @@ export const api = {
   // Share
   shareTodo: (id, userIds) => request('POST', `/api/todos/${id}/share`, { userIds }),
   unshareTodo: (id) => request('DELETE', `/api/todos/${id}/share`),
+
+  // Profile
+  updateProfile: (data) => request('PUT', '/api/auth/profile', data),
+  changePassword: (data) => request('PUT', '/api/auth/password', data),
 }
 
 export { getToken, setToken, clearToken }

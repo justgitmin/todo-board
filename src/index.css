@@ -4,13 +4,48 @@
   box-sizing: border-box;
 }
 
+/* ═══ Dark Mode Variables ═══ */
+:root[data-theme="light"] {
+  --bg-gradient: linear-gradient(135deg, #e8f4fd 0%, #f0e6ff 50%, #e8f4fd 100%);
+  --text-primary: #333;
+  --text-secondary: #555;
+  --text-muted: #888;
+  --card-bg: #fffde7;
+  --column-bg: rgba(255, 255, 255, 0.65);
+  --column-hover: rgba(255, 255, 255, 0.8);
+  --input-bg: white;
+  --input-border: #e0e0e0;
+  --modal-bg: white;
+  --header-color: #1a237e;
+  --badge-dday-bg: #e3f2fd;
+  --badge-dday-color: #1565c0;
+}
+
+:root[data-theme="dark"] {
+  --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  --text-primary: #e0e0e0;
+  --text-secondary: #bbb;
+  --text-muted: #888;
+  --card-bg: #2a2a3e;
+  --column-bg: rgba(40, 40, 60, 0.7);
+  --column-hover: rgba(50, 50, 70, 0.8);
+  --input-bg: #2a2a3e;
+  --input-border: #444;
+  --modal-bg: #1e1e2e;
+  --header-color: #a5b4fc;
+  --badge-dday-bg: #1e3a5f;
+  --badge-dday-color: #90caf9;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #e8f4fd 0%, #f0e6ff 50%, #e8f4fd 100%);
+  background: var(--bg-gradient);
   background-attachment: fixed;
+  color: var(--text-primary);
   min-height: 100vh;
   padding: 2rem;
   position: relative;
+  transition: background 0.3s, color 0.3s;
 }
 
 body::before {
@@ -28,6 +63,12 @@ body::before {
     radial-gradient(ellipse 40% 25% at 90% 75%, rgba(255,255,255,0.35) 0%, transparent 45%);
   pointer-events: none;
   z-index: 0;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+[data-theme="dark"] body::before {
+  opacity: 0.05;
 }
 
 body > #root {
@@ -132,7 +173,7 @@ body > #root {
 .app-header h1 {
   margin-bottom: 0;
   font-size: 1.6rem;
-  color: #1a237e;
+  color: var(--header-color);
 }
 
 .user-info {
@@ -352,7 +393,7 @@ body > #root {
 }
 
 .board-column {
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--column-bg);
   border-radius: 16px;
   padding: 1rem;
   min-height: 300px;
@@ -361,16 +402,16 @@ body > #root {
 }
 
 .board-column:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--column-hover);
 }
 
 .column-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #444;
+  color: var(--text-primary);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--input-border);
 }
 
 .column-cards {
@@ -857,4 +898,232 @@ body > #root {
 
 .modal-btn.save:hover {
   background: #5a52d5;
+}
+
+
+/* ═══ Theme Toggle & Profile ═══ */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.theme-toggle:hover {
+  background: rgba(108, 99, 255, 0.1);
+}
+
+.profile-btn {
+  padding: 0.4rem 0.8rem;
+  background: none;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+.profile-btn:hover {
+  background: rgba(108, 99, 255, 0.1);
+}
+
+/* Profile Modal */
+.profile-modal {
+  max-width: 380px;
+}
+
+.profile-modal h4 {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin: 0.8rem 0 0.5rem;
+}
+
+.profile-section {
+  margin-bottom: 0.8rem;
+}
+
+.profile-section label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.profile-section input {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.profile-section input:focus {
+  border-color: #6c63ff;
+}
+
+.profile-section input:disabled {
+  opacity: 0.5;
+}
+
+.profile-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.profile-row input {
+  flex: 1;
+}
+
+.profile-row button {
+  padding: 0.5rem 1rem;
+  background: #6c63ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-divider {
+  border: none;
+  border-top: 1px solid var(--input-border);
+  margin: 1rem 0;
+}
+
+.profile-save-btn {
+  width: 100%;
+  padding: 0.7rem;
+  background: #6c63ff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.profile-save-btn:hover {
+  background: #5a52d5;
+}
+
+.profile-msg {
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.4rem;
+  border-radius: 6px;
+  margin-bottom: 0.8rem;
+}
+
+.profile-msg.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.profile-msg.error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* ═══ Dark Mode Overrides ═══ */
+[data-theme="dark"] .auth-card {
+  background: var(--modal-bg);
+}
+
+[data-theme="dark"] .auth-card input {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .todo-card {
+  background: var(--card-bg) !important;
+  border-left-color: #6c63ff !important;
+}
+
+[data-theme="dark"] .todo-card:nth-child(4n+1) {
+  border-left-color: #fdd835 !important;
+}
+
+[data-theme="dark"] .todo-card:nth-child(4n+2) {
+  border-left-color: #66bb6a !important;
+}
+
+[data-theme="dark"] .todo-card:nth-child(4n+3) {
+  border-left-color: #42a5f5 !important;
+}
+
+[data-theme="dark"] .todo-card:nth-child(4n) {
+  border-left-color: #ef5350 !important;
+}
+
+[data-theme="dark"] .card-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .add-todo-form input {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .tab-btn {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .meta-row input,
+[data-theme="dark"] .meta-row textarea,
+[data-theme="dark"] .add-checklist input {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-content {
+  background: var(--modal-bg);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .help-modal {
+  background: var(--modal-bg);
+}
+
+[data-theme="dark"] .help-modal li {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .logout-btn {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .user-info {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .checklist-item span {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .badge.dday {
+  background: var(--badge-dday-bg);
+  color: var(--badge-dday-color);
+}
+
+[data-theme="dark"] .status-btn {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-secondary);
 }
