@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
-import db from './db.js'
+import { initDb, getOne, getAll, run } from './db.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -33,33 +33,31 @@ function authMiddleware(req, res, next) {
 //  인증 API
 // ════════════════════════════════════════
 
-// 회원가입
 app.post('/api/auth/register', (req, res) => {
   const { username, password, displayName } = req.body
   if (!username || !password || !displayName) {
     return res.status(400).json({ error: '모든 필드를 입력하세요.' })
   }
 
-  const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(username)
+  const existing = getOne('SELECT id FROM users WHERE username = ?', [username])
   if (existing) {
     return res.status(409).json({ error: '이미 존재하는 아이디입니다.' })
   }
 
   const hashed = bcrypt.hashSync(password, 10)
-  const result = db.prepare('INSERT INTO users (username, password, displayName) VALUES (?, ?, ?)').run(username, hashed, displayName)
+  const result = run('INSERT INTO users (username, password, displayName) VALUES (?, ?, ?)', [username, hashed, displayName])
 
-  const token = createSession(result.lastInsertRowid)
-  res.json({ token, user: { id: result.lastInsertRowid, username, displayName } })
+  const token = createSession(result.lastId)
+  res.json({ token, user: { id: result.lastId, username, displayName } })
 })
 
-// 로그인
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body
   if (!username || !password) {
     return res.status(400).json({ error: '아이디와 비밀번호를 입력하세요.' })
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username)
+  const user = getOne('SELECT * FROM users WHERE username = ?', [username])
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(401).json({ error: '아이디 또는 비밀번호가 틀립니다.' })
   }
@@ -68,13 +66,11 @@ app.post('/api/auth/login', (req, res) => {
   res.json({ token, user: { id: user.id, username: user.username, displayName: user.displayName } })
 })
 
-// 현재 사용자 정보
 app.get('/api/auth/me', authMiddleware, (req, res) => {
-  const user = db.prepare('SELECT id, username, displayName FROM users WHERE id = ?').get(req.userId)
+  const user = getOne('SELECT id, username, displayName FROM users WHERE id = ?', [req.userId])
   res.json({ user })
 })
 
-// 로그아웃
 app.post('/api/auth/logout', (req, res) => {
   const token = req.headers['authorization']?.replace('Bearer ', '')
   if (token) delete sessions[token]
@@ -86,7 +82,7 @@ app.post('/api/auth/logout', (req, res) => {
 // ════════════════════════════════════════
 
 app.get('/api/users', authMiddleware, (req, res) => {
-  const users = db.prepare('SELECT id, username, displayName FROM users WHERE id != ?').all(req.userId)
+  const users = getAll('SELECT id, username, displayName FROM users WHERE id != ?', [req.userId])
   res.json({ users })
 })
 
@@ -94,28 +90,24 @@ app.get('/api/users', authMiddleware, (req, res) => {
 //  할일(Todo) CRUD API
 // ════════════════════════════════════════
 
-// 내 할일 + 공유받은 할일 조회
 app.get('/api/todos', authMiddleware, (req, res) => {
-  // 내 할일
-  const myTodos = db.prepare('SELECT * FROM todos WHERE ownerId = ? ORDER BY createdAt DESC').all(req.userId)
+  const myTodos = getAll('SELECT * FROM todos WHERE ownerId = ? ORDER BY createdAt DESC', [req.userId])
 
-  // 공유받은 할일
-  const sharedTodos = db.prepare(`
+  const sharedTodos = getAll(`
     SELECT t.*, u.displayName as ownerName
     FROM todos t
     JOIN shares s ON s.todoId = t.id
     JOIN users u ON u.id = t.ownerId
     WHERE s.sharedWithId = ?
     ORDER BY t.createdAt DESC
-  `).all(req.userId)
+  `, [req.userId])
 
-  // 각 할일의 공유 대상 목록 추가
   const addShareInfo = (todo) => {
-    const shares = db.prepare(`
+    const shares = getAll(`
       SELECT u.id, u.displayName
       FROM shares s JOIN users u ON u.id = s.sharedWithId
       WHERE s.todoId = ?
-    `).all(todo.id)
+    `, [todo.id])
     return { ...todo, checklist: JSON.parse(todo.checklist), shares }
   }
 
@@ -125,61 +117,52 @@ app.get('/api/todos', authMiddleware, (req, res) => {
   })
 })
 
-// 할일 생성
 app.post('/api/todos', authMiddleware, (req, res) => {
   const { title, status = 'todo', deadline = '', comment = '', checklist = [] } = req.body
   if (!title) return res.status(400).json({ error: '제목을 입력하세요.' })
 
-  const result = db.prepare(
-    'INSERT INTO todos (ownerId, title, status, deadline, comment, checklist) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(req.userId, title, status, deadline, comment, JSON.stringify(checklist))
+  const result = run(
+    'INSERT INTO todos (ownerId, title, status, deadline, comment, checklist) VALUES (?, ?, ?, ?, ?, ?)',
+    [req.userId, title, status, deadline, comment, JSON.stringify(checklist)]
+  )
 
-  const todo = db.prepare('SELECT * FROM todos WHERE id = ?').get(result.lastInsertRowid)
+  const todo = getOne('SELECT * FROM todos WHERE id = ?', [result.lastId])
   res.json({ todo: { ...todo, checklist: JSON.parse(todo.checklist), shares: [] } })
 })
 
-// 할일 수정
 app.put('/api/todos/:id', authMiddleware, (req, res) => {
-  const todo = db.prepare('SELECT * FROM todos WHERE id = ?').get(req.params.id)
+  const todo = getOne('SELECT * FROM todos WHERE id = ?', [Number(req.params.id)])
   if (!todo) return res.status(404).json({ error: '할일을 찾을 수 없습니다.' })
 
-  // 소유자이거나 공유받은 사람만 수정 가능
-  const isSharedWith = db.prepare('SELECT id FROM shares WHERE todoId = ? AND sharedWithId = ?').get(todo.id, req.userId)
+  const isSharedWith = getOne('SELECT id FROM shares WHERE todoId = ? AND sharedWithId = ?', [todo.id, req.userId])
   if (todo.ownerId !== req.userId && !isSharedWith) {
     return res.status(403).json({ error: '수정 권한이 없습니다.' })
   }
 
   const { title, status, deadline, comment, checklist } = req.body
-  db.prepare(`
-    UPDATE todos SET
-      title = COALESCE(?, title),
-      status = COALESCE(?, status),
-      deadline = COALESCE(?, deadline),
-      comment = COALESCE(?, comment),
-      checklist = COALESCE(?, checklist)
-    WHERE id = ?
-  `).run(
-    title ?? null,
-    status ?? null,
-    deadline ?? null,
-    comment ?? null,
-    checklist !== undefined ? JSON.stringify(checklist) : null,
-    req.params.id
-  )
 
-  const updated = db.prepare('SELECT * FROM todos WHERE id = ?').get(req.params.id)
+  const newTitle = title !== undefined ? title : todo.title
+  const newStatus = status !== undefined ? status : todo.status
+  const newDeadline = deadline !== undefined ? deadline : todo.deadline
+  const newComment = comment !== undefined ? comment : todo.comment
+  const newChecklist = checklist !== undefined ? JSON.stringify(checklist) : todo.checklist
+
+  run(`UPDATE todos SET title=?, status=?, deadline=?, comment=?, checklist=? WHERE id=?`,
+    [newTitle, newStatus, newDeadline, newComment, newChecklist, todo.id])
+
+  const updated = getOne('SELECT * FROM todos WHERE id = ?', [todo.id])
   res.json({ todo: { ...updated, checklist: JSON.parse(updated.checklist) } })
 })
 
-// 할일 삭제
 app.delete('/api/todos/:id', authMiddleware, (req, res) => {
-  const todo = db.prepare('SELECT * FROM todos WHERE id = ?').get(req.params.id)
+  const todo = getOne('SELECT * FROM todos WHERE id = ?', [Number(req.params.id)])
   if (!todo) return res.status(404).json({ error: '할일을 찾을 수 없습니다.' })
   if (todo.ownerId !== req.userId) {
     return res.status(403).json({ error: '삭제 권한이 없습니다.' })
   }
 
-  db.prepare('DELETE FROM todos WHERE id = ?').run(req.params.id)
+  run('DELETE FROM shares WHERE todoId = ?', [todo.id])
+  run('DELETE FROM todos WHERE id = ?', [todo.id])
   res.json({ success: true })
 })
 
@@ -187,52 +170,53 @@ app.delete('/api/todos/:id', authMiddleware, (req, res) => {
 //  공유 API
 // ════════════════════════════════════════
 
-// 할일 공유하기
 app.post('/api/todos/:id/share', authMiddleware, (req, res) => {
-  const { userIds } = req.body // [userId1, userId2, ...]
+  const { userIds } = req.body
   if (!userIds || !Array.isArray(userIds)) {
     return res.status(400).json({ error: '공유 대상을 선택하세요.' })
   }
 
-  const todo = db.prepare('SELECT * FROM todos WHERE id = ?').get(req.params.id)
+  const todo = getOne('SELECT * FROM todos WHERE id = ?', [Number(req.params.id)])
   if (!todo) return res.status(404).json({ error: '할일을 찾을 수 없습니다.' })
   if (todo.ownerId !== req.userId) {
     return res.status(403).json({ error: '소유자만 공유할 수 있습니다.' })
   }
 
-  // 기존 공유 제거 후 새로 설정
-  db.prepare('DELETE FROM shares WHERE todoId = ?').run(todo.id)
+  run('DELETE FROM shares WHERE todoId = ?', [todo.id])
 
-  const insert = db.prepare('INSERT OR IGNORE INTO shares (todoId, sharedWithId) VALUES (?, ?)')
   for (const uid of userIds) {
     if (uid !== req.userId) {
-      insert.run(todo.id, uid)
+      run('INSERT OR IGNORE INTO shares (todoId, sharedWithId) VALUES (?, ?)', [todo.id, uid])
     }
   }
 
-  const shares = db.prepare(`
+  const shares = getAll(`
     SELECT u.id, u.displayName
     FROM shares s JOIN users u ON u.id = s.sharedWithId
     WHERE s.todoId = ?
-  `).all(todo.id)
+  `, [todo.id])
 
   res.json({ shares })
 })
 
-// 공유 해제
 app.delete('/api/todos/:id/share', authMiddleware, (req, res) => {
-  const todo = db.prepare('SELECT * FROM todos WHERE id = ?').get(req.params.id)
+  const todo = getOne('SELECT * FROM todos WHERE id = ?', [Number(req.params.id)])
   if (!todo) return res.status(404).json({ error: '할일을 찾을 수 없습니다.' })
   if (todo.ownerId !== req.userId) {
     return res.status(403).json({ error: '소유자만 공유를 해제할 수 있습니다.' })
   }
 
-  db.prepare('DELETE FROM shares WHERE todoId = ?').run(todo.id)
+  run('DELETE FROM shares WHERE todoId = ?', [todo.id])
   res.json({ success: true })
 })
 
 // ════════════════════════════════════════
 
-app.listen(PORT, () => {
-  console.log(`✅ Todo Board Server running on http://localhost:${PORT}`)
-})
+async function start() {
+  await initDb()
+  app.listen(PORT, () => {
+    console.log(`✅ Todo Board Server running on http://localhost:${PORT}`)
+  })
+}
+
+start()
