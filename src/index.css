@@ -544,13 +544,34 @@ body > #root {
 }
 
 .badge.dday {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge.dday.safe {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge.dday.warning {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.badge.dday.urgent {
+  background: #ffebee;
+  color: #c62828;
+  animation: pulse 1.5s infinite;
 }
 
 .badge.dday.overdue {
   background: #ffebee;
   color: #c62828;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .badge.shared-badge {
@@ -1118,8 +1139,19 @@ body > #root {
 }
 
 [data-theme="dark"] .badge.dday {
-  background: var(--badge-dday-bg);
-  color: var(--badge-dday-color);
+  background: #1b3d1b;
+  color: #81c784;
+}
+
+[data-theme="dark"] .badge.dday.warning {
+  background: #3e2723;
+  color: #ffb74d;
+}
+
+[data-theme="dark"] .badge.dday.urgent,
+[data-theme="dark"] .badge.dday.overdue {
+  background: #3e1a1a;
+  color: #ef9a9a;
 }
 
 [data-theme="dark"] .status-btn {

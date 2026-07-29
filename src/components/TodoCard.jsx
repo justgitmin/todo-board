@@ -74,9 +74,11 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
     const deadline = new Date(todo.deadline)
     deadline.setHours(0, 0, 0, 0)
     const diff = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24))
-    if (diff === 0) return 'D-Day'
-    if (diff > 0) return `D-${diff}`
-    return `D+${Math.abs(diff)}`
+    if (diff === 0) return { text: 'D-Day', level: 'urgent' }
+    if (diff < 0) return { text: `D+${Math.abs(diff)}`, level: 'overdue' }
+    if (diff <= 2) return { text: `D-${diff}`, level: 'urgent' }
+    if (diff <= 5) return { text: `D-${diff}`, level: 'warning' }
+    return { text: `D-${diff}`, level: 'safe' }
   }
 
   const getProgress = () => {
@@ -170,8 +172,8 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
             <span className="badge shared-badge">👥 {todo.shares.length}명 공유</span>
           )}
           {dday && (
-            <span className={`badge dday ${isOverdue() ? 'overdue' : ''}`}>
-              {dday}
+            <span className={`badge dday ${dday.level}`}>
+              {dday.text}
             </span>
           )}
           {progress !== null && (
