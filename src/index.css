@@ -247,6 +247,45 @@ body > #root {
   padding: 0.2rem 0.5rem;
 }
 
+.help-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.help-item {
+  display: grid;
+  grid-template-columns: 1.8rem auto 1fr;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  align-items: baseline;
+}
+
+.help-num {
+  font-weight: 700;
+  color: #6c63ff;
+  text-align: right;
+}
+
+.help-title {
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+}
+
+.help-desc {
+  color: #666;
+}
+
+[data-theme="dark"] .help-title {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .help-desc {
+  color: #aaa;
+}
+
 .help-modal ol {
   padding-left: 0;
   display: flex;
@@ -410,8 +449,9 @@ body > #root {
     padding: 1.2rem;
   }
 
-  .help-modal li {
+  .help-item {
     font-size: 0.8rem;
+    grid-template-columns: 1.6rem auto 1fr;
   }
 }
 
@@ -1141,10 +1181,6 @@ body > #root {
 
 [data-theme="dark"] .help-modal {
   background: var(--modal-bg);
-}
-
-[data-theme="dark"] .help-modal li {
-  color: var(--text-secondary);
 }
 
 [data-theme="dark"] .logout-btn {
