@@ -133,10 +133,6 @@ body {
 }
 
 /* ═══ Help Guide ═══ */
-.help-guide {
-  position: relative;
-}
-
 .help-toggle {
   padding: 0.4rem 0.8rem;
   background: #fff3e0;
@@ -153,47 +149,53 @@ body {
   background: #ffe0b2;
 }
 
-.help-content {
-  position: absolute;
-  top: 2.5rem;
-  right: 0;
+.help-modal {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  width: 360px;
-  z-index: 500;
-  max-height: 70vh;
+  width: 90%;
+  max-width: 420px;
+  max-height: 85vh;
   overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.help-content h3 {
-  margin-bottom: 0.8rem;
-  font-size: 1rem;
+.help-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.help-modal-header h3 {
+  font-size: 1.1rem;
   color: #333;
 }
 
-.help-content ol {
+.help-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #888;
+  padding: 0.2rem 0.5rem;
+}
+
+.help-modal ol {
   padding-left: 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
-.help-content li {
+.help-modal li {
   font-size: 0.85rem;
   color: #555;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-.help-content li strong {
+.help-modal li strong {
   color: #333;
-}
-
-.help-content li em {
-  color: #6c63ff;
-  font-style: normal;
-  font-weight: 600;
 }
 
 /* ═══ Tab Bar ═══ */
@@ -277,6 +279,50 @@ body {
 @media (max-width: 900px) {
   .board {
     grid-template-columns: 1fr;
+  }
+
+  body {
+    padding: 1rem;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 0.8rem;
+    text-align: center;
+  }
+
+  .app-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .user-info {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .add-todo-form {
+    max-width: 100%;
+  }
+
+  .tab-bar {
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .todo-card {
+    padding: 0.8rem 1rem;
+  }
+
+  .card-title {
+    font-size: 0.9rem;
+  }
+
+  .meta-row {
+    flex-direction: column;
   }
 }
 
