@@ -7,7 +7,13 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
   const [titleDraft, setTitleDraft] = useState(todo.title)
   const [editingCheckId, setEditingCheckId] = useState(null)
   const [checkDraft, setCheckDraft] = useState('')
+  const [commentDraft, setCommentDraft] = useState(todo.comment)
   const titleInputRef = useRef(null)
+
+  // todo.comment가 외부(실시간 동기화)에서 바뀌면 draft도 갱신
+  useEffect(() => {
+    setCommentDraft(todo.comment)
+  }, [todo.comment])
 
   useEffect(() => {
     if (editingTitle && titleInputRef.current) {
@@ -262,8 +268,13 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
             <label style={{ flex: 1 }}>
               코멘트
               <textarea
-                value={todo.comment}
-                onChange={(e) => onUpdate({ comment: e.target.value })}
+                value={commentDraft}
+                onChange={(e) => setCommentDraft(e.target.value)}
+                onBlur={() => {
+                  if (commentDraft !== todo.comment) {
+                    onUpdate({ comment: commentDraft })
+                  }
+                }}
                 placeholder="메모를 남겨보세요..."
               />
             </label>
