@@ -5,6 +5,8 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
   const [newCheckItem, setNewCheckItem] = useState('')
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(todo.title)
+  const [editingCheckId, setEditingCheckId] = useState(null)
+  const [checkDraft, setCheckDraft] = useState('')
   const titleInputRef = useRef(null)
 
   useEffect(() => {
@@ -36,6 +38,31 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
     if (window.confirm(`"${item?.text}" 항목을 삭제하시겠습니까?`)) {
       onUpdate({ checklist: todo.checklist.filter((i) => i.id !== checkId) })
     }
+  }
+
+  const startCheckEdit = (item) => {
+    setEditingCheckId(item.id)
+    setCheckDraft(item.text)
+  }
+
+  const commitCheckEdit = (checkId) => {
+    const trimmed = checkDraft.trim()
+    if (trimmed) {
+      const updated = todo.checklist.map((item) =>
+        item.id === checkId ? { ...item, text: trimmed } : item
+      )
+      onUpdate({ checklist: updated })
+    }
+    setEditingCheckId(null)
+  }
+
+  const moveCheckItem = (index, direction) => {
+    const newList = [...todo.checklist]
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= newList.length) return
+    const [item] = newList.splice(index, 1)
+    newList.splice(targetIndex, 0, item)
+    onUpdate({ checklist: newList })
   }
 
   const handleCheckKeyDown = (e) => {
@@ -244,21 +271,60 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
 
           {/* Checklist */}
           <ul className="checklist">
-            {todo.checklist.map((item) => (
+            {todo.checklist.map((item, index) => (
               <li key={item.id} className="checklist-item">
                 <input
                   type="checkbox"
                   checked={item.done}
                   onChange={() => toggleChecklist(item.id)}
                 />
-                <span className={item.done ? 'done' : ''}>{item.text}</span>
-                <button
-                  className="remove-check-btn"
-                  onClick={() => removeCheckItem(item.id)}
-                  aria-label={`${item.text} 삭제`}
-                >
-                  ✕
-                </button>
+                {editingCheckId === item.id ? (
+                  <input
+                    className="check-edit-input"
+                    type="text"
+                    value={checkDraft}
+                    onChange={(e) => setCheckDraft(e.target.value)}
+                    onBlur={() => commitCheckEdit(item.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') commitCheckEdit(item.id)
+                      if (e.key === 'Escape') setEditingCheckId(null)
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <span
+                    className={item.done ? 'done' : ''}
+                    onDoubleClick={() => startCheckEdit(item)}
+                    title="더블클릭하여 수정"
+                  >
+                    {item.text}
+                  </span>
+                )}
+                <div className="check-actions">
+                  <button
+                    className="check-move-btn"
+                    onClick={() => moveCheckItem(index, -1)}
+                    disabled={index === 0}
+                    title="위로"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    className="check-move-btn"
+                    onClick={() => moveCheckItem(index, 1)}
+                    disabled={index === todo.checklist.length - 1}
+                    title="아래로"
+                  >
+                    ▼
+                  </button>
+                  <button
+                    className="remove-check-btn"
+                    onClick={() => removeCheckItem(item.id)}
+                    aria-label={`${item.text} 삭제`}
+                  >
+                    ✕
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

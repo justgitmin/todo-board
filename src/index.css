@@ -791,16 +791,54 @@ body > #root {
   height: 16px;
   accent-color: #6c63ff;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .checklist-item span {
   font-size: 0.9rem;
   color: #444;
+  flex: 1;
+  cursor: default;
 }
 
 .checklist-item span.done {
   text-decoration: line-through;
   opacity: 0.5;
+}
+
+.check-edit-input {
+  flex: 1;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid #6c63ff;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.check-actions {
+  display: flex;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.check-move-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  cursor: pointer;
+  font-size: 0.6rem;
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+  transition: color 0.2s;
+}
+
+.check-move-btn:hover:not(:disabled) {
+  color: #6c63ff;
+}
+
+.check-move-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
 .checklist-item .remove-check-btn {
