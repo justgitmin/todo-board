@@ -173,17 +173,22 @@ function App() {
   if (loading) return <div className="loading">로딩 중...</div>
   if (!user) return <AuthForm onLogin={handleLogin} />
 
-  // 할 일: 내 할일 중 상태가 todo 또는 inProgress
-  const myActiveTodos = todos.filter((t) => t.status === 'todo' || t.status === 'inProgress')
-  // 공유 작업: 공유된 할일 (내가 공유한 + 공유받은) 중 미완료
+  // 할 일: 내 할일 중 공유 안 한 것, 미완료
+  const myActiveTodos = todos.filter((t) => (t.status === 'todo' || t.status === 'inProgress') && (!t.shares || t.shares.length === 0))
+  // 공유 작업: 내가 공유한 + 공유받은 할일 중 미완료 (중복 제거)
+  const mySharedTodos = todos.filter((t) => (t.shares && t.shares.length > 0) && t.status !== 'done')
+  const receivedSharedTodos = sharedTodos.filter((t) => t.status !== 'done')
+  const sharedIds = new Set(mySharedTodos.map((t) => t.id))
   const sharedActiveTodos = [
-    ...todos.filter((t) => (t.shares && t.shares.length > 0) && t.status !== 'done'),
-    ...sharedTodos.filter((t) => t.status !== 'done'),
+    ...mySharedTodos,
+    ...receivedSharedTodos.filter((t) => !sharedIds.has(t.id)),
   ]
-  // 완료: 내 할일 + 공유받은 할일 중 완료
+  // 완료: 내 할일 + 공유받은 할일 중 완료 (중복 제거)
+  const myDoneTodos = todos.filter((t) => t.status === 'done')
+  const doneIds = new Set(myDoneTodos.map((t) => t.id))
   const doneTodos = [
-    ...todos.filter((t) => t.status === 'done'),
-    ...sharedTodos.filter((t) => t.status === 'done'),
+    ...myDoneTodos,
+    ...sharedTodos.filter((t) => t.status === 'done' && !doneIds.has(t.id)),
   ]
 
   const getColumnTodos = (colId) => {
