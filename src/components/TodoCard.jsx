@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { TAG_OPTIONS } from '../App'
 
 function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, isOwner }) {
   const [expanded, setExpanded] = useState(false)
@@ -196,8 +197,16 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
       </div>
 
       {/* Summary badges */}
-      {(dday !== null || progress !== null || hasShares || todo.isShared) && (
+      {(dday !== null || progress !== null || hasShares || todo.isShared || (todo.tags && todo.tags.length > 0)) && (
         <div className="card-summary">
+          {todo.tags && todo.tags.map((tagId) => {
+            const tag = TAG_OPTIONS.find((t) => t.id === tagId)
+            return tag ? (
+              <span key={tagId} className="badge tag-badge" style={{ background: tag.color + '20', color: tag.color }}>
+                {tag.label}
+              </span>
+            ) : null
+          })}
           {todo.isShared && (
             <span className="badge shared-badge">📨 {todo.ownerName}</span>
           )}
@@ -250,6 +259,29 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
               👥 공유 설정
             </button>
           )}
+
+          {/* Tags */}
+          <div className="tag-selector">
+            {TAG_OPTIONS.map((tag) => {
+              const isSelected = todo.tags && todo.tags.includes(tag.id)
+              return (
+                <button
+                  key={tag.id}
+                  className={`tag-chip ${isSelected ? 'selected' : ''}`}
+                  style={{ '--tag-color': tag.color }}
+                  onClick={() => {
+                    const currentTags = todo.tags || []
+                    const newTags = isSelected
+                      ? currentTags.filter((t) => t !== tag.id)
+                      : [...currentTags, tag.id]
+                    onUpdate({ tags: newTags })
+                  }}
+                >
+                  {tag.label}
+                </button>
+              )
+            })}
+          </div>
 
           {/* Deadline & Comment */}
           <div className="meta-row">

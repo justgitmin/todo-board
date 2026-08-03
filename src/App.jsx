@@ -14,12 +14,22 @@ const COLUMNS = [
   { id: 'done', label: '✅ 완료' },
 ]
 
+export const TAG_OPTIONS = [
+  { id: 'urgent', label: '🔴 긴급', color: '#e53935' },
+  { id: 'meeting', label: '🟡 회의', color: '#fdd835' },
+  { id: 'dev', label: '🔵 개발', color: '#1e88e5' },
+  { id: 'doc', label: '🟢 문서', color: '#43a047' },
+  { id: 'etc', label: '🟣 기타', color: '#8e24aa' },
+]
+
 function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [todos, setTodos] = useState([])
   const [sharedTodos, setSharedTodos] = useState([])
   const [newTitle, setNewTitle] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterTag, setFilterTag] = useState('') // '' = all
   const [shareModal, setShareModal] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
@@ -173,22 +183,38 @@ function App() {
   if (loading) return <div className="loading">로딩 중...</div>
   if (!user) return <AuthForm onLogin={handleLogin} />
 
+  // 검색 & 태그 필터
+  const filterTodos = (list) => {
+    let filtered = list
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase()
+      filtered = filtered.filter((t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.comment && t.comment.toLowerCase().includes(q))
+      )
+    }
+    if (filterTag) {
+      filtered = filtered.filter((t) => t.tags && t.tags.includes(filterTag))
+    }
+    return filtered
+  }
+
   // 할 일: 내 할일 중 공유 안 한 것, 미완료
-  const myActiveTodos = todos.filter((t) => (t.status === 'todo' || t.status === 'inProgress') && (!t.shares || t.shares.length === 0))
+  const myActiveTodos = filterTodos(todos.filter((t) => (t.status === 'todo' || t.status === 'inProgress') && (!t.shares || t.shares.length === 0)))
   // 공유 작업: 내가 공유한 + 공유받은 할일 중 미완료 (중복 제거)
-  const mySharedTodos = todos.filter((t) => (t.shares && t.shares.length > 0) && t.status !== 'done')
-  const receivedSharedTodos = sharedTodos.filter((t) => t.status !== 'done')
+  const mySharedTodos = filterTodos(todos.filter((t) => (t.shares && t.shares.length > 0) && t.status !== 'done'))
+  const receivedSharedTodos = filterTodos(sharedTodos.filter((t) => t.status !== 'done'))
   const sharedIds = new Set(mySharedTodos.map((t) => t.id))
   const sharedActiveTodos = [
     ...mySharedTodos,
     ...receivedSharedTodos.filter((t) => !sharedIds.has(t.id)),
   ]
   // 완료: 내 할일 + 공유받은 할일 중 완료 (중복 제거)
-  const myDoneTodos = todos.filter((t) => t.status === 'done')
+  const myDoneTodos = filterTodos(todos.filter((t) => t.status === 'done'))
   const doneIds = new Set(myDoneTodos.map((t) => t.id))
   const doneTodos = [
     ...myDoneTodos,
-    ...sharedTodos.filter((t) => t.status === 'done' && !doneIds.has(t.id)),
+    ...filterTodos(sharedTodos.filter((t) => t.status === 'done')).filter((t) => !doneIds.has(t.id)),
   ]
 
   const getColumnTodos = (colId) => {
@@ -231,6 +257,34 @@ function App() {
           onKeyDown={handleKeyDown}
         />
         <button onClick={addTodo}>추가</button>
+      </div>
+
+      <div className="filter-bar">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="🔍 검색..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <div className="tag-filters">
+          <button
+            className={`tag-filter-btn ${filterTag === '' ? 'active' : ''}`}
+            onClick={() => setFilterTag('')}
+          >
+            전체
+          </button>
+          {TAG_OPTIONS.map((tag) => (
+            <button
+              key={tag.id}
+              className={`tag-filter-btn ${filterTag === tag.id ? 'active' : ''}`}
+              onClick={() => setFilterTag(filterTag === tag.id ? '' : tag.id)}
+              style={{ '--tag-color': tag.color }}
+            >
+              {tag.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="board">

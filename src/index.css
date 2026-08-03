@@ -1743,3 +1743,95 @@ body > #root {
 .admin-reset-pw button:hover {
   background: #f57c00;
 }
+
+
+/* ═══ Search & Filter Bar ═══ */
+.filter-bar {
+  max-width: 700px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 2px solid var(--input-border, #e0e0e0);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  outline: none;
+  background: var(--input-bg, white);
+  color: var(--text-primary, #333);
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #6c63ff;
+}
+
+.tag-filters {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tag-filter-btn {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--input-border, #e0e0e0);
+  border-radius: 16px;
+  background: var(--input-bg, white);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-secondary, #666);
+  transition: all 0.2s;
+}
+
+.tag-filter-btn:hover {
+  border-color: var(--tag-color, #6c63ff);
+  color: var(--tag-color, #6c63ff);
+}
+
+.tag-filter-btn.active {
+  background: var(--tag-color, #6c63ff);
+  border-color: var(--tag-color, #6c63ff);
+  color: white;
+}
+
+/* ═══ Tag Selector (inside card) ═══ */
+.tag-selector {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.tag-chip {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--tag-color, #ccc);
+  border-radius: 12px;
+  background: transparent;
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--tag-color, #666);
+  transition: all 0.2s;
+}
+
+.tag-chip.selected {
+  background: var(--tag-color, #6c63ff);
+  color: white;
+  border-color: var(--tag-color, #6c63ff);
+}
+
+.tag-chip:hover:not(.selected) {
+  background: color-mix(in srgb, var(--tag-color) 10%, transparent);
+}
+
+/* Tag badge in summary */
+.badge.tag-badge {
+  font-size: 0.6rem;
+  padding: 0.15rem 0.4rem;
+}

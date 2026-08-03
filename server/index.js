@@ -169,30 +169,30 @@ app.get('/api/todos', authMiddleware, (req, res) => {
       FROM shares s JOIN users u ON u.id = s.sharedWithId
       WHERE s.todoId = ?
     `, [todo.id])
-    return { ...todo, checklist: JSON.parse(todo.checklist), shares }
+    return { ...todo, checklist: JSON.parse(todo.checklist), tags: JSON.parse(todo.tags || '[]'), shares }
   }
 
   res.json({
     myTodos: myTodos.map(addShareInfo),
-    sharedTodos: sharedTodos.map((t) => ({ ...t, checklist: JSON.parse(t.checklist), isShared: true })),
+    sharedTodos: sharedTodos.map((t) => ({ ...t, checklist: JSON.parse(t.checklist), tags: JSON.parse(t.tags || '[]'), isShared: true })),
   })
 })
 
 app.post('/api/todos', authMiddleware, (req, res) => {
-  const { title, status = 'todo', deadline = '', comment = '', checklist = [] } = req.body
+  const { title, status = 'todo', deadline = '', comment = '', checklist = [], tags = [] } = req.body
   if (!title) return res.status(400).json({ error: '제목을 입력하세요.' })
 
   const result = run(
-    'INSERT INTO todos (ownerId, title, status, deadline, comment, checklist) VALUES (?, ?, ?, ?, ?, ?)',
-    [req.userId, title, status, deadline, comment, JSON.stringify(checklist)]
+    'INSERT INTO todos (ownerId, title, status, deadline, comment, checklist, tags) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [req.userId, title, status, deadline, comment, JSON.stringify(checklist), JSON.stringify(tags)]
   )
 
   const todo = getOne('SELECT * FROM todos WHERE id = ?', [result.lastId])
   if (!todo) {
     const fallback = getOne('SELECT * FROM todos WHERE ownerId = ? ORDER BY id DESC LIMIT 1', [req.userId])
-    return res.json({ todo: { ...fallback, checklist: JSON.parse(fallback.checklist), shares: [] } })
+    return res.json({ todo: { ...fallback, checklist: JSON.parse(fallback.checklist), tags: JSON.parse(fallback.tags || '[]'), shares: [] } })
   }
-  res.json({ todo: { ...todo, checklist: JSON.parse(todo.checklist), shares: [] } })
+  res.json({ todo: { ...todo, checklist: JSON.parse(todo.checklist), tags: JSON.parse(todo.tags || '[]'), shares: [] } })
 })
 
 app.put('/api/todos/:id', authMiddleware, (req, res) => {
@@ -204,20 +204,21 @@ app.put('/api/todos/:id', authMiddleware, (req, res) => {
     return res.status(403).json({ error: '수정 권한이 없습니다.' })
   }
 
-  const { title, status, deadline, comment, checklist } = req.body
+  const { title, status, deadline, comment, checklist, tags } = req.body
 
   const newTitle = title !== undefined ? title : todo.title
   const newStatus = status !== undefined ? status : todo.status
   const newDeadline = deadline !== undefined ? deadline : todo.deadline
   const newComment = comment !== undefined ? comment : todo.comment
   const newChecklist = checklist !== undefined ? JSON.stringify(checklist) : todo.checklist
+  const newTags = tags !== undefined ? JSON.stringify(tags) : (todo.tags || '[]')
 
-  run(`UPDATE todos SET title=?, status=?, deadline=?, comment=?, checklist=? WHERE id=?`,
-    [newTitle, newStatus, newDeadline, newComment, newChecklist, todo.id])
+  run(`UPDATE todos SET title=?, status=?, deadline=?, comment=?, checklist=?, tags=? WHERE id=?`,
+    [newTitle, newStatus, newDeadline, newComment, newChecklist, newTags, todo.id])
 
   const updated = getOne('SELECT * FROM todos WHERE id = ?', [todo.id])
   notifyTodoUpdate(todo.id, req.userId)
-  res.json({ todo: { ...updated, checklist: JSON.parse(updated.checklist) } })
+  res.json({ todo: { ...updated, checklist: JSON.parse(updated.checklist), tags: JSON.parse(updated.tags || '[]') } })
 })
 
 app.delete('/api/todos/:id', authMiddleware, (req, res) => {
