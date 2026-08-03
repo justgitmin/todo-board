@@ -236,7 +236,7 @@ function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, i
                 }}
                 disabled={todo.status === s}
               >
-                {s === 'todo' ? '📝 할일' : s === 'inProgress' ? '🚀 진행' : '✅ 완료'}
+                {s === 'todo' ? '📝 할일' : s === 'inProgress' ? '🚀 진행중' : '✅ 완료'}
               </button>
             ))}
           </div>

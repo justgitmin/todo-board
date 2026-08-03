@@ -10,7 +10,7 @@ import { api, getToken, clearToken } from './api'
 
 const COLUMNS = [
   { id: 'todo', label: '📝 할 일' },
-  { id: 'inProgress', label: '🚀 진행 중' },
+  { id: 'shared', label: '🤝 공유 작업' },
   { id: 'done', label: '✅ 완료' },
 ]
 
@@ -20,8 +20,7 @@ function App() {
   const [todos, setTodos] = useState([])
   const [sharedTodos, setSharedTodos] = useState([])
   const [newTitle, setNewTitle] = useState('')
-  const [tab, setTab] = useState('mine') // 'mine' | 'shared'
-  const [shareModal, setShareModal] = useState(null) // todo to share
+  const [shareModal, setShareModal] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true')
@@ -174,7 +173,24 @@ function App() {
   if (loading) return <div className="loading">로딩 중...</div>
   if (!user) return <AuthForm onLogin={handleLogin} />
 
-  const activeTodos = tab === 'mine' ? todos : sharedTodos
+  // 할 일: 내 할일 중 상태가 todo 또는 inProgress
+  const myActiveTodos = todos.filter((t) => t.status === 'todo' || t.status === 'inProgress')
+  // 공유 작업: 공유된 할일 (내가 공유한 + 공유받은) 중 미완료
+  const sharedActiveTodos = [
+    ...todos.filter((t) => (t.shares && t.shares.length > 0) && t.status !== 'done'),
+    ...sharedTodos.filter((t) => t.status !== 'done'),
+  ]
+  // 완료: 내 할일 + 공유받은 할일 중 완료
+  const doneTodos = [
+    ...todos.filter((t) => t.status === 'done'),
+    ...sharedTodos.filter((t) => t.status === 'done'),
+  ]
+
+  const getColumnTodos = (colId) => {
+    if (colId === 'todo') return myActiveTodos
+    if (colId === 'shared') return sharedActiveTodos
+    return doneTodos
+  }
 
   return (
     <>
@@ -201,33 +217,16 @@ function App() {
         </div>
       </header>
 
-      <div className="tab-bar">
-        <button
-          className={`tab-btn ${tab === 'mine' ? 'active' : ''}`}
-          onClick={() => setTab('mine')}
-        >
-          내 할일 ({todos.length})
-        </button>
-        <button
-          className={`tab-btn ${tab === 'shared' ? 'active' : ''}`}
-          onClick={() => setTab('shared')}
-        >
-          공유받은 할일 ({sharedTodos.length})
-        </button>
+      <div className="add-todo-form">
+        <input
+          type="text"
+          placeholder="새 할일을 입력하세요..."
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        <button onClick={addTodo}>추가</button>
       </div>
-
-      {tab === 'mine' && (
-        <div className="add-todo-form">
-          <input
-            type="text"
-            placeholder="새 할일을 입력하세요..."
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button onClick={addTodo}>추가</button>
-        </div>
-      )}
 
       <div className="board">
         {COLUMNS.map((col) => (
@@ -237,13 +236,11 @@ function App() {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col.id)}
           >
-            <h2 className="column-title">{col.label}</h2>
+            <h2 className="column-title">{col.label} ({getColumnTodos(col.id).length})</h2>
             <div className="column-cards">
-              {activeTodos
-                .filter((t) => t.status === col.id)
-                .map((todo) => (
+              {getColumnTodos(col.id).map((todo) => (
                   <TodoCard
-                    key={todo.id}
+                    key={`${todo.id}-${todo.isShared ? 's' : 'm'}`}
                     todo={todo}
                     onUpdate={(updates) => updateTodo(todo.id, updates)}
                     onDelete={() => deleteTodo(todo.id)}
