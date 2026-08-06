@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { TAG_OPTIONS } from '../App'
 
-function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, isOwner }) {
-  const [expanded, setExpanded] = useState(false)
+function TodoCard({ todo, onUpdate, onDelete, onShare, onDragStart, onDragEnd, isOwner, defaultExpanded = false }) {
+  const [expanded, setExpanded] = useState(defaultExpanded)
   const [newCheckItem, setNewCheckItem] = useState('')
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(todo.title)

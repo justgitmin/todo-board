@@ -31,6 +31,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTag, setFilterTag] = useState('') // '' = all
   const [shareModal, setShareModal] = useState(null)
+  const [fullscreenCol, setFullscreenCol] = useState(null) // column id or null
   const [showProfile, setShowProfile] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true')
@@ -295,7 +296,16 @@ function App() {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col.id)}
           >
-            <h2 className="column-title">{col.label} ({getColumnTodos(col.id).length})</h2>
+            <div className="column-header">
+              <h2 className="column-title">{col.label} ({getColumnTodos(col.id).length})</h2>
+              <button
+                className="fullscreen-btn"
+                onClick={() => setFullscreenCol(col.id)}
+                title="전체화면"
+              >
+                ⛶
+              </button>
+            </div>
             <div className="column-cards">
               {getColumnTodos(col.id).map((todo) => (
                   <TodoCard
@@ -313,6 +323,33 @@ function App() {
           </div>
         ))}
       </div>
+
+      {/* Fullscreen Column View */}
+      {fullscreenCol && (
+        <div className="fullscreen-overlay">
+          <div className="fullscreen-header">
+            <h2>{COLUMNS.find((c) => c.id === fullscreenCol)?.label}</h2>
+            <button className="fullscreen-close" onClick={() => setFullscreenCol(null)}>
+              ✕ 닫기
+            </button>
+          </div>
+          <div className="fullscreen-cards">
+            {getColumnTodos(fullscreenCol).map((todo) => (
+              <TodoCard
+                key={`fs-${todo.id}-${todo.isShared ? 's' : 'm'}`}
+                todo={todo}
+                onUpdate={(updates) => updateTodo(todo.id, updates)}
+                onDelete={() => deleteTodo(todo.id)}
+                onShare={() => setShareModal(todo)}
+                onDragStart={(e) => handleDragStart(e, todo.id)}
+                onDragEnd={handleDragEnd}
+                isOwner={!todo.isShared}
+                defaultExpanded={true}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {shareModal && (
         <ShareModal
